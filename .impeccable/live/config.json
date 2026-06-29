@@ -1,0 +1,12 @@
+{
+  "files": [
+    "undangan_pernikahan_elara_fino_tanpa_menu.html",
+    "src/routes/__root.tsx",
+    "app/root.tsx",
+    "index.html"
+  ],
+  "exclude": [],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

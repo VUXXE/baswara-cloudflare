@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* ============================================================
+   VUXXE DESIGN SYSTEM — Tailwind v4 @theme migration
+   All tokens migrated from tailwind.config.js (v3 format)
+   ============================================================ */
+
+/* ---- Google Fonts (loaded via __root.tsx head links) ----
+   Primary loaded fonts:
+   - Hurricane: display-romantic, section-title, headline-lg
+   - Indie Flower: body-lg, body-md
+   - Work Sans: meta-data, label-caps
+   - Caveat: script accents
+   - Montserrat: clean sans-serif for UI
+   - Playfair Display: fallback serif                         */
+
+@theme {
+  /* ---- Brand Colors (Maroon/Burgundy) ---- */
+  --color-primary: #8e1622;
+  --color-primary-foreground: #ffffff;
+  --color-primary-container: #ffd9db;
+  --color-primary-fixed: #ffd9db;
+  --color-primary-fixed-dim: #ffb2b6;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #3e000a;
+  --color-on-primary-fixed: #3e000a;
+  --color-on-primary-fixed-variant: #6f0019;
+  --color-inverse-primary: #ffb2b6;
+
+  /* ---- Secondary ---- */
+  --color-secondary: #6a5f04;
+  --color-secondary-container: #f0e17f;
+  --color-secondary-fixed: #f3e481;
+  --color-secondary-fixed-dim: #d6c868;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #6e6309;
+  --color-on-secondary-fixed: #201c00;
+  --color-on-secondary-fixed-variant: #504700;
+
+  /* ---- Tertiary / Sunset ---- */
+  --color-tertiary: #ab3510;
+  --color-tertiary-container: #fe7047;
+  --color-tertiary-fixed: #ffdbd1;
+  --color-tertiary-fixed-dim: #ffb5a0;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #651600;
+  --color-on-tertiary-fixed: #3b0900;
+  --color-on-tertiary-fixed-variant: #872100;
+  --color-sunset-accent: #E45D36;
+
+  /* ---- Neutrals / Surface ---- */
+  --color-background: #fcf9ee;
+  --color-background-alt: #FEFFDE;
+  --color-surface: #fcf9ee;
+  --color-surface-bright: #fcf9ee;
+  --color-surface-dim: #dddad0;
+  --color-surface-variant: #e5e3d8;
+  --color-surface-tint: #8e1622;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f6f4e9;
+  --color-surface-container: #f1eee3;
+  --color-surface-container-high: #ebe8dd;
+  --color-surface-container-highest: #e5e3d8;
+  --color-inverse-surface: #31312a;
+  --color-inverse-on-surface: #f4f1e6;
+
+  /* ---- On-Surface Tokens ---- */
+  --color-on-background: #1c1c16;
+  --color-on-surface: #1c1c16;
+  --color-on-surface-variant: #47483a;
+  --color-foreground: #1c1c16;
+
+  /* ---- Utility Colors ---- */
+  --color-outline: #787868;
+  --color-outline-variant: #c8c8b5;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-floral-green: #98A250;
+  --color-text-main: #4A4A4A;
+
+  /* ---- Font Families ---- */
+  --font-display-romantic: "Playfair Display", serif;
+  --font-section-title: "Playfair Display", serif;
+  --font-headline-lg: "Playfair Display", serif;
+  --font-body-lg: "Indie Flower", cursive;
+  --font-body-md: "Indie Flower", cursive;
+  --font-meta-data: "Work Sans", sans-serif;
+  --font-label-caps: "Work Sans", sans-serif;
+  --font-caveat: "Caveat", cursive;
+  --font-montserrat: "Montserrat", sans-serif;
+
+  /* ---- Spacing Tokens ---- */
+  --spacing-margin-mobile: 1.25rem;
+  --spacing-element-gap: 1.5rem;
+  --spacing-section-gap: 5rem;
+  --spacing-container-padding: 2rem;
+  --spacing-gutter: 1rem;
+}
+
+/* ---- Base Styles ---- */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    min-height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: var(--font-montserrat);
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+  }
+}
+
+/* ============================================================
+   UTILITY CLASS ALIASES
+   Tailwind v4 generates utilities from @theme automatically
+   but we keep explicit aliases for backward compat with
+   components using the old class names.
+   ============================================================ */
+
+/* ---- Typography Font Family Utilities ---- */
+.font-display-romantic { font-family: var(--font-display-romantic); }
+.font-section-title    { font-family: var(--font-section-title); }
+.font-headline-lg      { font-family: var(--font-headline-lg); }
+.font-body-lg          { font-family: var(--font-body-lg); }
+.font-body-md          { font-family: var(--font-body-md); }
+.font-meta-data        { font-family: var(--font-meta-data); }
+.font-label-caps       { font-family: var(--font-label-caps); letter-spacing: 0.1em; }
+.font-caveat           { font-family: var(--font-caveat); }
+.font-montserrat       { font-family: var(--font-montserrat); }
+.font-script           { font-family: var(--font-caveat); }
+
+/* ---- Typography Size Utilities ---- */
+.text-body-lg    { font-size: 20px; line-height: 30px; }
+.text-body-md    { font-size: 16px; line-height: 24px; }
+.text-meta-data  { font-size: 14px; line-height: 20px; }
+.text-headline-lg { font-size: 48px; line-height: 56px; }
+.text-label-caps { font-size: 12px; line-height: 16px; letter-spacing: 0.1em; font-weight: 600; }
+
+/* ---- Spacing Utilities ---- */
+.px-margin-mobile       { padding-left: var(--spacing-margin-mobile); padding-right: var(--spacing-margin-mobile); }
+.gap-element-gap        { gap: var(--spacing-element-gap); }
+.gap-section-gap        { gap: var(--spacing-section-gap); }
+.px-container-padding   { padding-left: var(--spacing-container-padding); padding-right: var(--spacing-container-padding); }
+
+/* ---- Color Utilities (explicit aliases for Tailwind v4 compat) ---- */
+.text-primary            { color: var(--color-primary); }
+.bg-primary              { background-color: var(--color-primary); }
+.border-primary          { border-color: var(--color-primary); }
+
+.text-on-primary         { color: var(--color-on-primary); }
+.text-on-surface         { color: var(--color-on-surface); }
+.text-on-surface-variant { color: var(--color-on-surface-variant); }
+.text-on-background      { color: var(--color-on-background); }
+.text-floral-green       { color: var(--color-floral-green); }
+.text-sunset-accent      { color: var(--color-sunset-accent); }
+.text-error              { color: var(--color-error); }
+.text-outline            { color: var(--color-outline); }
+.text-outline-variant    { color: var(--color-outline-variant); }
+
+.bg-background           { background-color: var(--color-background); }
+.bg-background-alt       { background-color: var(--color-background-alt); }
+.bg-surface              { background-color: var(--color-surface); }
+.bg-surface-dim          { background-color: var(--color-surface-dim); }
+.bg-surface-container-lowest { background-color: var(--color-surface-container-lowest); }
+.bg-surface-container-low    { background-color: var(--color-surface-container-low); }
+.bg-surface-container        { background-color: var(--color-surface-container); }
+.bg-surface-container-high   { background-color: var(--color-surface-container-high); }
+.bg-surface-container-highest { background-color: var(--color-surface-container-highest); }
+.bg-secondary-container  { background-color: var(--color-secondary-container); }
+.bg-secondary-fixed      { background-color: var(--color-secondary-fixed); }
+.bg-floral-green         { background-color: var(--color-floral-green); }
+.bg-outline-variant      { background-color: var(--color-outline-variant); }
+
+.border-outline-variant  { border-color: var(--color-outline-variant); }
+.border-surface-container-high { border-color: var(--color-surface-container-high); }
+
+/* ---- Scrollbar Utilities ---- */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-outline-variant) transparent;
+}
+
+/* ---- Custom Animations ---- */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}

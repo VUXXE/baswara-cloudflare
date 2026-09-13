@@ -1,73 +1,80 @@
-# React + TypeScript + Vite
+# Baswara — Cloudflare Edition
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Platform pembuatan undangan digital (wedding, birthday, seminar, party) — visual builder, RSVP tracking, guest check-in, QR & OG image generator. Rewrite penuh dari Supabase/Vercel ke 100% Cloudflare.
 
-Currently, two official plugins are available:
+> Repo pendahulu (Supabase + Vercel): [`VUXXE/Baswara`](https://github.com/VUXXE/Baswara)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+| Layer    | Tech |
+|----------|------|
+| Framework | TanStack Start (React 19, Vite 8, file-based routing) |
+| Hosting   | Cloudflare Workers (`@cloudflare/vite-plugin`) |
+| Database  | Cloudflare D1 (SQLite) via Drizzle ORM |
+| Storage   | Cloudflare R2 (`R2_BUCKET` binding) |
+| Auth      | Better Auth (email + password, session di D1) |
+| Styling   | TailwindCSS v4, Framer Motion |
+| OG images | `workers-og` (Satori + resvg WASM, jalan di Workers) |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Struktur
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+app/
+├── routes/            # File-based routes (tanstack router codegen)
+│   ├── api.auth.$.tsx # Better Auth API handler (GET+POST /api/auth/*)
+│   ├── api.og.tsx     # OG image generator (/api/og?groom=&bride=&...)
+│   ├── $slug.tsx      # Undangan publik + meta OG/WhatsApp
+│   ├── builder.tsx    # Visual builder (auth + D1)
+│   ├── dashboard*.tsx # Daftar project, check-in tamu, RSVP
+│   └── login.tsx / onboarding.tsx
+├── lib/
+│   ├── auth.ts        # Better Auth instance (per-request, lazy)
+│   ├── auth-client.ts # better-auth/react client
+│   ├── session.ts     # fetchUser serverFn (client-safe wrapper)
+│   ├── db.ts          # Drizzle D1 client
+│   ├── schema.ts      # Tabel auth + invitations + rsvps
+│   └── serverFns.ts   # RSVP, guest list, check-in, delete, uploadAsset (R2)
+├── components/editor/ # Sidebar builder (upload via R2)
+└── templates/         # WeddingClassic, BirthdayFun, Seminar, OtherParty
+drizzle/               # SQL migration D1 (drizzle-kit generate)
+wrangler.jsonc         # Workers + D1_DB + R2_BUCKET bindings
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Setup lokal
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .dev.vars   # isi kredensial di bawah
+npm run dev                 # vite dev :3000 (dengan plugin Cloudflare)
 ```
+
+### Variabel (`.dev.vars` lokal / dashboard Workers untuk production)
+
+| Var | Isi |
+|-----|-----|
+| `BETTER_AUTH_SECRET` | random string (min 32 char) untuk sign session |
+| `BETTER_AUTH_URL` | base URL app (`http://localhost:3000` lokal) |
+| `R2_PUBLIC_URL` | domain publik bucket (custom domain / `*.r2.dev`), untuk URL gambar |
+
+## Database & deploy pertama kali
+
+```bash
+# 1. Buat D1 + R2, lalu isi database_id di wrangler.jsonc
+npx wrangler d1 create baswara-db
+npx wrangler r2 bucket create baswara-assets
+
+# 2. Apply migrasi
+npx wrangler d1 migrations apply baswara-db   # dari folder drizzle/
+
+# 3. Generate route + build + deploy
+npm run generate-routes
+npm run deploy        # = npm run build && wrangler deploy
+```
+
+Perintah lain: `npm run preview` (wrangler dev), `npm run cf-typegen` (tipe binding Workers).
+
+## Catatan migrasi
+
+- Auth lama (Supabase) tidak terbawa — user harus register ulang; data `Invitation`/`Rsvp` lama perlu export-import manual bila ingin dipertahankan.
+- Upload editor dikirim sebagai base64 ke serverFn `uploadAsset` (batas body Workers ±100MB, aman untuk foto).
+- URL OG (`/api/og`) dan `siteUrl` di `$slug.tsx` masih menunjuk domain Vercel lama — ganti ke domain Cloudflare setelah deploy.

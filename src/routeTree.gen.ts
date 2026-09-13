@@ -16,6 +16,7 @@ import { Route as BuilderRouteImport } from './../app/routes/builder'
 import { Route as SlugRouteImport } from './../app/routes/$slug'
 import { Route as IndexRouteImport } from './../app/routes/index'
 import { Route as DashboardProjectIdRouteImport } from './../app/routes/dashboard_.$projectId'
+import { Route as ApiOgRouteImport } from './../app/routes/api.og'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -52,6 +53,11 @@ const DashboardProjectIdRoute = DashboardProjectIdRouteImport.update({
   path: '/dashboard/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOgRoute = ApiOgRouteImport.update({
+  id: '/api/og',
+  path: '/api/og',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/api/og': typeof ApiOgRoute
   '/dashboard/$projectId': typeof DashboardProjectIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/api/og': typeof ApiOgRoute
   '/dashboard/$projectId': typeof DashboardProjectIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/api/og': typeof ApiOgRoute
   '/dashboard_/$projectId': typeof DashboardProjectIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/api/og'
     | '/dashboard/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/api/og'
     | '/dashboard/$projectId'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/api/og'
     | '/dashboard_/$projectId'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  ApiOgRoute: typeof ApiOgRoute
   DashboardProjectIdRoute: typeof DashboardProjectIdRoute
 }
 
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/og': {
+      id: '/api/og'
+      path: '/api/og'
+      fullPath: '/api/og'
+      preLoaderRoute: typeof ApiOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  ApiOgRoute: ApiOgRoute,
   DashboardProjectIdRoute: DashboardProjectIdRoute,
 }
 export const routeTree = rootRouteImport

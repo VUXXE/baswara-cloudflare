@@ -10,7 +10,9 @@
     "dev": "node node_modules/vite/bin/vite.js dev --port 3000",
     "generate-routes": "node node_modules/@tanstack/router-cli/bin/tsr.cjs generate",
     "build": "node node_modules/vite/bin/vite.js build",
-    "preview": "node node_modules/vite/bin/vite.js preview",
+    "preview": "node node_modules/wrangler/dist/cli.js dev",
+    "deploy": "npm run build && node node_modules/wrangler/dist/cli.js deploy",
+    "cf-typegen": "node node_modules/wrangler/dist/cli.js types",
     "test": "node node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
@@ -29,15 +31,14 @@
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.545.0",
-    "pg": "^8.22.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-qr-code": "^2.2.0",
-    "@vercel/og": "^0.6.2",
     "tailwindcss": "^4.1.18",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.54.8",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "^1.132.0",
@@ -51,6 +52,8 @@
     "jsdom": "^28.1.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "workers-og": "^0.0.27",
+    "wrangler": "^4.131.1"
   }
 }

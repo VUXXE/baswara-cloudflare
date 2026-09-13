@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useInvitationStore } from '../store/useInvitationStore';
-import { createSupabaseClient } from '../lib/supabase/client';
+import { authClient } from '../lib/auth-client';
 import { saveInvitationData } from '../routes/builder';
 
 export default function BuilderPage({ initialData, slug, initialRsvps = [], projectId }: { initialData?: any, slug?: string, initialRsvps?: any[], projectId?: string }) {
@@ -20,7 +20,6 @@ export default function BuilderPage({ initialData, slug, initialRsvps = [], proj
   const { data } = useInvitationStore();
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
-  const supabase = createSupabaseClient();
 
   // Hydrate store on mount if initialData is provided
   useEffect(() => {
@@ -43,7 +42,7 @@ export default function BuilderPage({ initialData, slug, initialRsvps = [], proj
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut();
     navigate({ to: '/login' });
   };
 

@@ -1,7 +1,7 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import * as React from 'react';
 import '../index.css';
-import { fetchUser } from '../lib/auth';
+import { fetchUser } from '../lib/session';
 
 interface MyRouterContext {
   user: any | null;

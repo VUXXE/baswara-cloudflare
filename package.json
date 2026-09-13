@@ -16,8 +16,6 @@
     "test": "node node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.12.0",
-    "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
@@ -25,7 +23,9 @@
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "@yudiel/react-qr-scanner": "^2.6.0",
+    "better-auth": "^1.7.4",
     "canvas-confetti": "^1.9.4",
+    "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.40.0",
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
@@ -49,6 +49,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "drizzle-kit": "^0.31.10",
     "jsdom": "^28.1.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",

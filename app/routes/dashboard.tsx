@@ -4,30 +4,29 @@ import { createServerFn } from '@tanstack/react-start';
 import { Plus, Settings, Users, LayoutDashboard as DashboardIcon, LogOut, Share2, Download, X, Eye, Settings2, Trash2 } from 'lucide-react';
 
 import { fetchRsvps, deleteProject } from '../lib/serverFns';
-
-import { createSupabaseServerClient } from '../lib/supabase/server';
-import { createSupabaseClient } from '../lib/supabase/client';
+import { authClient } from '../lib/auth-client';
+import { invitations } from '../lib/schema';
+import { eq, desc } from 'drizzle-orm';
 
 const fetchDashboardData = createServerFn({ method: 'GET' })
   .handler(async () => {
-    const supabase = createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
+    const [{ getSessionUser }, { getDb }] = await Promise.all([
+      import('../lib/auth'),
+      import('../lib/db'),
+    ]);
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) {
       throw redirect({ to: '/login' });
     }
 
-    const { data: invitations, error } = await supabase
-      .from('Invitation')
-      .select('*')
-      .eq('userId', user.id)
-      .order('createdAt', { ascending: false });
+    const db = getDb();
+    const list = await db
+      .select()
+      .from(invitations)
+      .where(eq(invitations.userId, sessionUser.userId))
+      .orderBy(desc(invitations.createdAt));
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return invitations || [];
+    return list || [];
   });
 
 export const Route = createFileRoute('/dashboard')({
@@ -40,12 +39,11 @@ export const Route = createFileRoute('/dashboard')({
 
 function DashboardPage() {
   const invitations = Route.useLoaderData();
-  const supabase = createSupabaseClient();
   const navigate = useNavigate();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut();
     navigate({ to: '/login' });
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useInvitationStore } from '../../store/useInvitationStore';
 import { Type, Music, Calendar, MapPin, ChevronDown, ChevronUp, Gift, Upload, Plus, Trash2, Info, Image as ImageIcon, Clock, Palette, Video } from 'lucide-react';
-import { createSupabaseClient } from '../../lib/supabase/client';
+import { uploadAsset } from '../../lib/serverFns';
 
 export const BirthdayEditorSidebar = ({ activeMenu = 'COVER' }: { activeMenu?: string }) => {
   const { data, updateData, updateEvent, addEvent, removeEvent, updateBank, addBank, removeBank, setInvitationOpen } = useInvitationStore();
@@ -51,23 +51,19 @@ export const BirthdayEditorSidebar = ({ activeMenu = 'COVER' }: { activeMenu?: s
 
     setUploading(true);
     try {
-      const supabase = createSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('You must be logged in to upload.');
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1] || '');
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('invitation-assets')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('invitation-assets')
-        .getPublicUrl(filePath);
+      const { publicUrl } = await uploadAsset({
+        data: { fileName: file.name, contentType: file.type || 'application/octet-stream', base64 },
+      });
 
       if (fieldName === 'galleryPhotos' && arrayIndex !== undefined) {
         const newArray = [...(data.galleryPhotos || [])];

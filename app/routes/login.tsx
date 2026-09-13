@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router';
 import { useState } from 'react';
-import { createSupabaseClient } from '../lib/supabase/client';
-import { Loader2, Mail, Lock, ShieldCheck, Star } from 'lucide-react';
-import { fetchUser } from '../lib/auth';
+import { authClient } from '../lib/auth-client';
+import { Loader2, Mail, Lock } from 'lucide-react';
 
 export const Route = createFileRoute('/login')({
   beforeLoad: async ({ context }) => {
@@ -18,10 +17,8 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const supabase = createSupabaseClient();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,28 +32,13 @@ function LoginPage() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        await fetchUser();
-        navigate({ to: '/dashboard' });
+        const { error } = await authClient.signIn.email({ email, password });
+        if (error) throw new Error(error.message);
       } else {
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`
-          }
-        });
-        if (error) throw error;
-        
-        if (data?.user && !data?.session) {
-          setIsVerificationSent(true);
-          return;
-        }
-        
-        await fetchUser();
-        navigate({ to: '/dashboard' });
+        const { error } = await authClient.signUp.email({ email, password, name: email });
+        if (error) throw new Error(error.message);
       }
+      navigate({ to: '/dashboard' });
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -102,30 +84,6 @@ function LoginPage() {
       <div className="w-full lg:w-[55%] flex flex-col justify-center items-center p-6 relative">
         <div className="w-full max-w-[480px] bg-white p-10 md:p-14 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in-up">
           
-          {isVerificationSent ? (
-            <div className="text-center">
-              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <Mail className="w-10 h-10 text-green-500" />
-              </div>
-              <h2 className="text-3xl font-black uppercase tracking-tight text-gray-900 mb-4">
-                Check Your Email
-              </h2>
-              <p className="text-gray-500 text-sm font-medium mb-10 leading-relaxed px-4">
-                We've sent a verification link to <span className="font-bold text-gray-900">{email}</span>. 
-                Please check your inbox to activate your account.
-              </p>
-              <button
-                onClick={() => {
-                  setIsVerificationSent(false);
-                  setIsLogin(true);
-                  setPassword('');
-                }}
-                className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold uppercase tracking-widest text-sm transition-all"
-              >
-                Back to Login
-              </button>
-            </div>
-          ) : (
             <>
               <div className="text-center mb-10">
                 <h2 className="text-3xl font-black uppercase tracking-tight text-gray-900 mb-2">
@@ -233,7 +191,6 @@ function LoginPage() {
                 </p>
               </div>
             </>
-          )}
 
         </div>
       </div>

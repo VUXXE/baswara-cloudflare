@@ -1,24 +1,27 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { eq, desc } from 'drizzle-orm';
 import { Preview } from '../pages/Preview';
-import { createSupabaseServerClient } from '../lib/supabase/server';
+import { invitations, rsvps } from '../lib/schema';
 import { defaultData } from '../store/useInvitationStore';
 
 const fetchInvitationBySlug = createServerFn({ method: 'GET' })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    const supabase = createSupabaseServerClient();
-    const { data: invitation, error } = await supabase
-      .from('Invitation')
-      .select('*, profile:Profile(*), rsvps:Rsvp(*)')
-      .eq('slug', slug)
-      .order('createdAt', { foreignTable: 'Rsvp', ascending: false })
-      .single();
-    
-    if (error || !invitation) {
+    const { getDb } = await import('../lib/db');
+    const db = getDb();
+    const invitation = await db
+      .select()
+      .from(invitations)
+      .where(eq(invitations.slug, slug))
+      .limit(1)
+      .then((r) => r[0]);
+
+    if (!invitation) {
       if (slug === 'shin-lena') {
         return {
           id: 'demo',
+          slug,
           data: defaultData,
           rsvps: [
             { id: '1', guestName: 'Budi', attendance: 'yes', guestsCount: 2, wishMessage: 'Happy wedding!', createdAt: new Date().toISOString() },
@@ -28,7 +31,14 @@ const fetchInvitationBySlug = createServerFn({ method: 'GET' })
       }
       throw notFound();
     }
-    return invitation;
+
+    const invitationRsvps = await db
+      .select()
+      .from(rsvps)
+      .where(eq(rsvps.invitationId, invitation.id))
+      .orderBy(desc(rsvps.createdAt));
+
+    return { ...invitation, rsvps: invitationRsvps };
   });
 
 

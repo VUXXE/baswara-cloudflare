@@ -3,15 +3,19 @@ import { createServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, PartyPopper, Link2, ChevronRight, Sparkles, Info, Mic, GlassWater, ArrowLeft } from 'lucide-react';
-import { createSupabaseServerClient } from '../lib/supabase/server';
+import { invitations } from '../lib/schema';
 
 export const createInvitation = createServerFn({ method: 'POST' })
   .validator((data: { groomName: string; brideName: string; slug: string; templateId: string }) => data)
   .handler(async ({ data }) => {
-    const supabase = createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) throw new Error('Unauthorized');
+    const [{ getSessionUser }, { getDb }] = await Promise.all([
+      import('../lib/auth'),
+      import('../lib/db'),
+    ]);
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) throw new Error('Unauthorized');
+
+    const db = getDb();
 
     // Basic initial payload merging their names
     const initialPayload = {
@@ -34,17 +38,15 @@ export const createInvitation = createServerFn({ method: 'POST' })
       banks: []
     };
 
-    const { data: invitation, error } = await supabase.from('Invitation').insert({
-      userId: user.id,
+    const invitationId = crypto.randomUUID();
+    const invitation = await db.insert(invitations).values({
+      id: invitationId,
+      userId: sessionUser.userId,
       slug: data.slug,
       data: initialPayload,
-    }).select().single();
+    }).returning();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return { success: true, invitation };
+    return { success: true, invitation: invitation[0] };
   });
 
 export const Route = createFileRoute('/onboarding')({

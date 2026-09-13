@@ -8,5 +8,18 @@
   "main": "@tanstack/react-start/server-entry",
   "observability": {
     "enabled": true
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "D1_DB",
+      "database_name": "baswara-db",
+      "database_id": "placeholder"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "baswara-assets"
+    }
+  ]
 }

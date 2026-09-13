@@ -2,20 +2,27 @@
 
 Live: **https://baswara.bdrrhmnhnn.workers.dev**
 
-Platform pembuatan undangan digital (wedding, birthday, seminar, party) — visual builder, RSVP tracking, guest check-in, QR & OG image generator. Rewrite penuh dari Supabase/Vercel ke 100% Cloudflare.
+Platform pembuatan undangan digital — visual builder, RSVP tracking, guest check-in, QR & OG image generator. Rewrite penuh dari Supabase/Vercel ke 100% Cloudflare.
 
 > Repo pendahulu (Supabase + Vercel): [`VUXXE/Baswara`](https://github.com/VUXXE/Baswara)
 
+## Fitur
+
+- **Visual builder** — 4 template (Wedding Classic, Birthday Fun, Seminar, Other Party), sidebar editor + live preview
+- **RSVP & guest check-in** — tracking kehadiran, guest list, template WhatsApp
+- **QR & OG image** — QR tamu + `/api/og` generator kartu sosial dinamis (WA/FB/X)
+- **Auth** — email + password via Better Auth, session di D1
+
 ## Stack
 
-| Layer    | Tech |
-|----------|------|
+| Layer | Tech |
+|-------|------|
 | Framework | TanStack Start (React 19, Vite 8, file-based routing) |
-| Hosting   | Cloudflare Workers (`@cloudflare/vite-plugin`) |
-| Database  | Cloudflare D1 (SQLite) via Drizzle ORM |
-| Storage   | Cloudflare R2 (`R2_BUCKET` binding) |
-| Auth      | Better Auth (email + password, session di D1) |
-| Styling   | TailwindCSS v4, Framer Motion |
+| Hosting | Cloudflare Workers (`@cloudflare/vite-plugin`) |
+| Database | Cloudflare D1 (SQLite) via Drizzle ORM |
+| Storage | Cloudflare R2 (`R2_BUCKET` binding) |
+| Auth | Better Auth (email + password, session di D1) |
+| Styling | TailwindCSS v4, Framer Motion |
 | OG images | `workers-og` (Satori + resvg WASM, jalan di Workers) |
 
 ## Struktur
@@ -39,6 +46,7 @@ app/
 ├── components/editor/ # Sidebar builder (upload via R2)
 └── templates/         # WeddingClassic, BirthdayFun, Seminar, OtherParty
 drizzle/               # SQL migration D1 (drizzle-kit generate)
+scripts/ship.sh        # One-command deploy
 wrangler.jsonc         # Workers + D1_DB + R2_BUCKET bindings
 ```
 
@@ -46,11 +54,11 @@ wrangler.jsonc         # Workers + D1_DB + R2_BUCKET bindings
 
 ```bash
 npm install
-cp .env.example .dev.vars   # isi kredensial di bawah
+cp .env.example .env        # isi nilainya, jangan commit
 npm run dev                 # vite dev :3000 (dengan plugin Cloudflare)
 ```
 
-### Variabel (`.dev.vars` lokal / dashboard Workers untuk production)
+### Variabel (`.env` lokal / `wrangler secret` untuk production)
 
 | Var | Isi |
 |-----|-----|
@@ -58,7 +66,7 @@ npm run dev                 # vite dev :3000 (dengan plugin Cloudflare)
 | `BETTER_AUTH_URL` | base URL app (`http://localhost:3000` lokal) |
 | `R2_PUBLIC_URL` | domain publik bucket (custom domain / `*.r2.dev`), untuk URL gambar |
 
-## Database & deploy
+## Deploy
 
 Satu perintah untuk semuanya (bikin D1/R2 kalau belum ada, apply migrasi, generate secret, build, deploy):
 
@@ -69,22 +77,17 @@ npm run ship
 Manual per langkah (kalau perlu):
 
 ```bash
-# 1. Buat D1 + R2, lalu isi database_id di wrangler.jsonc
-npx wrangler d1 create baswara-db
+npx wrangler d1 create baswara-db          # isi database_id ke wrangler.jsonc
 npx wrangler r2 bucket create baswara-assets
-
-# 2. Apply migrasi
-npx wrangler d1 migrations apply baswara-db   # dari folder drizzle/
-
-# 3. Generate route + build + deploy
+npx wrangler d1 migrations apply baswara-db --remote   # dari folder drizzle/
 npm run generate-routes
 npm run deploy        # = npm run build && wrangler deploy
 ```
 
 Perintah lain: `npm run preview` (wrangler dev), `npm run cf-typegen` (tipe binding Workers).
 
-## Catatan migrasi
+## Catatan
 
-- Auth lama (Supabase) tidak terbawa — user harus register ulang; data `Invitation`/`Rsvp` lama perlu export-import manual bila ingin dipertahankan.
-- Upload editor dikirim sebagai base64 ke serverFn `uploadAsset` (batas body Workers ±100MB, aman untuk foto).
-- URL OG (`/api/og`) dan `siteUrl` di `$slug.tsx` masih menunjuk domain Vercel lama — ganti ke domain Cloudflare setelah deploy.
+- Upload editor dikirim sebagai base64 ke serverFn `uploadAsset` (batas body Workers aman untuk foto).
+- Meta OG (`og:url`, `og:image`) diambil dari request host — otomatis ikut custom domain tanpa ubah kode.
+- Server-only code (`cloudflare:workers`, D1, Better Auth) diakses via dynamic `import()` di dalam handler agar client bundle tetap bersih — jangan import statis dari komponen.

@@ -9,7 +9,9 @@ export const Route = createFileRoute("/api/og")({
     handlers: {
       GET: async ({ request }) => {
         try {
-          const { searchParams } = new URL(request.url);
+          const reqUrl = new URL(request.url);
+          const { searchParams } = reqUrl;
+          const assetBase = reqUrl.origin;
           const groom = searchParams.get("groom") || "Shin";
           const bride = searchParams.get("bride") || "Lena";
           const date = searchParams.get("date") || "";
@@ -106,7 +108,7 @@ export const Route = createFileRoute("/api/og")({
                     }}
                   >
                     <img
-                      src="https://ds1-navy.vercel.app/favicon.svg"
+                      src={`${assetBase}/favicon.svg`}
                       style={{
                         width: "40px",
                         height: "40px",

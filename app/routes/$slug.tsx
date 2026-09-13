@@ -8,8 +8,24 @@ import { defaultData } from '../store/useInvitationStore';
 const fetchInvitationBySlug = createServerFn({ method: 'GET' })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    const { getDb } = await import('../lib/db');
+    const [{ getDb }, { getRequestHeaders }] = await Promise.all([
+      import('../lib/db'),
+      import('@tanstack/react-start/server'),
+    ]);
     const db = getDb();
+
+    // Derive public site URL from the incoming request (no hardcoded domain)
+    let siteUrl = 'https://baswara.bdrrhmnhnn.workers.dev';
+    try {
+      const headers = getRequestHeaders() as unknown as Headers;
+      const host =
+        headers.get('x-forwarded-host') || headers.get('host') || '';
+      const proto =
+        headers.get('x-forwarded-proto') || 'https';
+      if (host) siteUrl = `${proto}://${host}`;
+    } catch {
+      // keep fallback
+    }
     const invitation = await db
       .select()
       .from(invitations)
@@ -22,6 +38,7 @@ const fetchInvitationBySlug = createServerFn({ method: 'GET' })
         return {
           id: 'demo',
           slug,
+          siteUrl,
           data: defaultData,
           rsvps: [
             { id: '1', guestName: 'Budi', attendance: 'yes', guestsCount: 2, wishMessage: 'Happy wedding!', createdAt: new Date().toISOString() },
@@ -38,7 +55,7 @@ const fetchInvitationBySlug = createServerFn({ method: 'GET' })
       .where(eq(rsvps.invitationId, invitation.id))
       .orderBy(desc(rsvps.createdAt));
 
-    return { ...invitation, rsvps: invitationRsvps };
+    return { ...invitation, siteUrl, rsvps: invitationRsvps };
   });
 
 
@@ -67,9 +84,9 @@ export const Route = createFileRoute('/$slug')({
       ? `${groomName} & ${brideName} · ${descParts.join(' · ')} · Klik untuk membuka undangan digital.`
       : `${groomName} & ${brideName} mengundang Anda untuk hadir di hari bahagia mereka. Klik untuk membuka undangan.`;
 
-    const BASE_URL = 'https://ds1-navy.vercel.app';
+    const BASE_URL = (loaderData as any)?.siteUrl || 'https://baswara.bdrrhmnhnn.workers.dev';
 
-    // Only use a photo if it's already an absolute URL (Supabase storage URL)
+    // Only use a photo if it's already an absolute URL (R2 public URL)
     // Relative paths like '/cover.png' won't work for WhatsApp crawlers
     const isAbsoluteUrl = (url: string | undefined) => 
       typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
@@ -80,7 +97,7 @@ export const Route = createFileRoute('/$slug')({
         ? raw.coverPhoto
         : `${BASE_URL}/cover.png`;
         
-    const siteUrl = 'https://ds1-navy.vercel.app';
+    const siteUrl = BASE_URL;
     
     // Build the dynamic OG Image URL
     const ogImageUrl = new URL(`${siteUrl}/api/og`);

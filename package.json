@@ -10,9 +10,10 @@
     "dev": "node node_modules/vite/bin/vite.js dev --port 3000",
     "generate-routes": "node node_modules/@tanstack/router-cli/bin/tsr.cjs generate",
     "build": "node node_modules/vite/bin/vite.js build",
-    "preview": "node node_modules/wrangler/dist/cli.js dev",
-    "deploy": "npm run build && node node_modules/wrangler/dist/cli.js deploy",
-    "cf-typegen": "node node_modules/wrangler/dist/cli.js types",
+    "preview": "wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "ship": "bash scripts/ship.sh",
+    "cf-typegen": "wrangler types",
     "test": "node node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {

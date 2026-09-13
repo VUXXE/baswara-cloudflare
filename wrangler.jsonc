@@ -13,7 +13,8 @@
     {
       "binding": "D1_DB",
       "database_name": "baswara-db",
-      "database_id": "placeholder"
+      "database_id": "e37b41ac-04dd-4d90-ba3a-9acd105baa43",
+      "migrations_dir": "drizzle"
     }
   ],
   "r2_buckets": [

@@ -1,5 +1,7 @@
 # Baswara — Cloudflare Edition
 
+Live: **https://baswara.bdrrhmnhnn.workers.dev**
+
 Platform pembuatan undangan digital (wedding, birthday, seminar, party) — visual builder, RSVP tracking, guest check-in, QR & OG image generator. Rewrite penuh dari Supabase/Vercel ke 100% Cloudflare.
 
 > Repo pendahulu (Supabase + Vercel): [`VUXXE/Baswara`](https://github.com/VUXXE/Baswara)
@@ -56,7 +58,15 @@ npm run dev                 # vite dev :3000 (dengan plugin Cloudflare)
 | `BETTER_AUTH_URL` | base URL app (`http://localhost:3000` lokal) |
 | `R2_PUBLIC_URL` | domain publik bucket (custom domain / `*.r2.dev`), untuk URL gambar |
 
-## Database & deploy pertama kali
+## Database & deploy
+
+Satu perintah untuk semuanya (bikin D1/R2 kalau belum ada, apply migrasi, generate secret, build, deploy):
+
+```bash
+npm run ship
+```
+
+Manual per langkah (kalau perlu):
 
 ```bash
 # 1. Buat D1 + R2, lalu isi database_id di wrangler.jsonc
